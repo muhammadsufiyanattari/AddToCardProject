@@ -1,11 +1,12 @@
 const container = document.querySelector(".custom-shop-container");
-const cartItems = document.querySelector(".cart-items");
-const cardRow = document.querySelectorAll(".cart-row item");
+const inputQty = document.querySelector(".cart-quantity-input");
+const cartappend=document.querySelector(".cart-items");
+const purchaseBtn = document.querySelector("#purchaseBtn");
+const creatHtml = (ItemName, ItemPrice, ItemSrc) => {
+  const addedCardRow = document.createElement("div");
+addedCardRow.className = "cart-row item";
+  const addValue = (addedCardRow.innerHTML += `
 
-const creatHtml = (ItemName,ItemPrice,ItemSrc) => {
-  const addValue = (cartItems.innerHTML += `
-
-<div class="cart-row item">
             <div class="cart-item cart-column">
               <img
                 
@@ -26,48 +27,92 @@ const creatHtml = (ItemName,ItemPrice,ItemSrc) => {
                 REMOVE
               </button>
             </div>
-          </div>
+          
 
 `);
+cartappend.appendChild(addedCardRow);
 };
-const addTotal=(Price)=>{
-  const total=0;
-const totalPrice=document.querySelector(".cart-total-price").textContent
-const itemUnitPrice=Number(cartItems.querySelector(".cart-price-item-item").textContent)
-const ItemQty=Number(cartItems.querySelector(".cart-quantity-input").value)
- total=itemUnitPrice*ItemQty
+const calculateTotal = () => {
+  const cartRows=document.querySelectorAll(".cart-items .cart-row");
+  let total = 0;
+cartRows.forEach((cartRow) => {
+  const Price=Number(cartRow.querySelector(".cart-price-item-item").innerText)
+  const Qty=Number(cartRow.querySelector(".cart-quantity-input").value)
+   total+=Price*Qty
+  console.log(total)
+  console.log(Qty)
+
+})
 console.log(total);
-console.log(typeof itemUnitPrice);
-console.log(typeof ItemQty);
-
-// const myPrice=Number(Price)
-// const sub= Number(totalPrice.textContent);
-// const myValue= totalPrice.innerText=myPrice+sub
-// console.log(typeof sub);
-
-// console.log(typeof myPrice);
-// return myValue
-
-}
-const calculate=()=>{
-
-
-
-
-
-}
-container.addEventListener("click", (e) => {
+const totalPriceElement = document.querySelector(".cart-total-price");
+totalPriceElement.innerText = total.toFixed(2);
+};
+const findCartItemName = (ItemName) => {
+  let ItemTrue = false;
+  const cartRows = document.querySelectorAll(".cart-items .cart-row");
   
-  const getBtn = e.target.className;
-  if (getBtn === "btn btn-primary shop-item-button") {
-    const ItemName=e.target.parentElement.parentElement.querySelector(".shop-item-title").innerText
-    const ItemSrc=e.target.parentElement.parentElement.querySelector(".shop-item-image").src
-    const ItemPrice =e.target.parentElement.querySelector(".shop-item-price").innerText
-//     console.log(ItemName);
-//     console.log(ItemSrc);
-// console.log(ItemPrice);
+cartRows.forEach((cartRow) => {
+  const cardItemName = cartRow.querySelector(".cart-item-title").textContent;
+  const Qty=cartRow.querySelector(".cart-quantity-input");
 
-creatHtml(ItemName,ItemPrice,ItemSrc)
-addTotal(ItemPrice)
+  if (cardItemName === ItemName) {
+    Qty.value=Number (Qty.value)+1;
+        calculateTotal();
+
+    return ItemTrue= cartRow;
   }
 });
+return ItemTrue;
+};
+
+container.addEventListener("click", (e) => {
+  const getBtn = e.target.className;
+  if (getBtn === "btn btn-primary shop-item-button") {
+    const ItemName =
+      e.target.parentElement.parentElement.querySelector(
+        ".shop-item-title",
+      ).innerText;
+    const ItemSrc =
+      e.target.parentElement.parentElement.querySelector(
+        ".shop-item-image",
+      ).src;
+    const ItemPrice =
+      e.target.parentElement.querySelector(".shop-item-price").innerText;
+  
+const isExist=findCartItemName(ItemName)
+// console.log(isExist)
+    if (!isExist) {
+creatHtml(ItemName, ItemPrice, ItemSrc);
+      calculateTotal();
+    } else {
+            // alert("Item already in cart")
+            // findCartItemName(ItemName)
+
+    }
+  }
+});
+cartappend.addEventListener("change", (e) => {
+  const getBtn = e.target.className;
+  if (getBtn === "cart-quantity-input") {
+    calculateTotal();
+  }
+})
+cartappend.addEventListener("click", (e) => {
+  const getBtn = e.target.className;
+  if (getBtn === "btn btn-danger btn-remove") {
+e.target.closest(".cart-row").remove();
+      calculateTotal();
+
+    
+  }
+})
+purchaseBtn.addEventListener("click", (e) => {
+  if(cartappend.innerHTML){
+    alert("Your cart is empty!");
+    return;
+  }else{
+  cartappend.innerHTML="";
+  alert("Thank you for your shopping!");
+
+  }
+})
